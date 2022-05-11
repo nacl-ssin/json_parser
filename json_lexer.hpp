@@ -17,8 +17,8 @@ public:
 	 * 解析json_str
 	 * @param json_str
 	 */
-	static json_type_base *parse(const std::string &json_str) {
-		auto tokens = token_list(json_str);
+	static json_node parse(const std::string &json_str) {
+		auto tokens = extratuct_token(json_str);
 		std::cout << tokens.size() << std::endl;
 		for (auto &e : tokens) {
 			std::cout << e._value << " ";
@@ -26,11 +26,11 @@ public:
 		std::cout << std::endl << "size = " << tokens.size() << std::endl;
 		int i = 0;
 		if (tokens[0]._token == json_token_type::OBJECT_BEGIN) {
-			return token_to_object(tokens, i);
+			return (token_to_object(tokens, i));
 		} else if (tokens[0]._token == json_token_type::ARRAY_BEGIN) {
-			return token_to_array(tokens, i);
+			return (token_to_array(tokens, i));
 		} else {
-			return nullptr;
+			return (new json_simple(tokens[0]._value));
 		}
 	}
 
@@ -74,31 +74,16 @@ public:
 					}
 					continue;
 				}
-				case json_token_type::STRING: {
-					auto jstr = new json_string;
-					jstr->_data = v._value;
-					jnode->add(k._value, jstr);
-					break;
-				}
-				case json_token_type::NUMBER: {
-					auto jstr = new json_number;
-					jstr->_data = v._value;
-					jnode->add(k._value, jstr);
-					break;
-				}
-				case json_token_type::BOOLEAN: {
-					auto jstr = new json_boolean;
-					jstr->_data = v._value;
-					jnode->add(k._value, jstr);
-					break;
-				}
+				case json_token_type::STRING:
+				case json_token_type::NUMBER:
+				case json_token_type::BOOLEAN:
 				case json_token_type::NIL: {
-					auto jstr = new json_null;
-					jstr->_data = v._value;
+					auto jstr = new json_simple(v._value);
 					jnode->add(k._value, jstr);
 					break;
 				}
 				default:
+					std::cout << "default" << std::endl;
 					break;
 			}
 
@@ -147,31 +132,16 @@ public:
 					}
 					continue;
 				}
-				case json_token_type::STRING: {
-					auto jstr = new json_string;
-					jstr->_data = t._value;
-					jnode->add(jstr);
-					break;
-				}
-				case json_token_type::NUMBER: {
-					auto jstr = new json_number;
-					jstr->_data = t._value;
-					jnode->add(jstr);
-					break;
-				}
-				case json_token_type::BOOLEAN: {
-					auto jstr = new json_boolean;
-					jstr->_data = t._value;
-					jnode->add(jstr);
-					break;
-				}
+				case json_token_type::STRING:
+				case json_token_type::NUMBER:
+				case json_token_type::BOOLEAN:
 				case json_token_type::NIL: {
-					auto jstr = new json_null;
-					jstr->_data = t._value;
+					auto jstr = new json_simple(t._value);
 					jnode->add(jstr);
 					break;
 				}
 				default:
+					std::cout << "default" << std::endl;
 					break;
 			}
 
@@ -182,16 +152,7 @@ public:
 			}
 			++i;
 		}
-
-		// [[],]    =>     [[],]
-		//   ^                 ^
-		//	or :out of rang，返回
-		// []    =>     []
-		//  ^              ^
 		array_end:
-		if (i < toks.size()) {
-			std::cout << "{{{{{" << toks[i]._value << "}}}}}" << std::endl;
-		}
 		std::cout << "array----------------------end" << std::endl;
 		return jnode;
 	}
@@ -209,7 +170,7 @@ private:
 	 * @param json_str
 	 * @return
 	 */
-	static std::vector<token> token_list(const std::string &json_str) {
+	static std::vector<token> extratuct_token(const std::string &json_str) {
 		std::vector<token> tokens;
 		auto n = json_str.size();
 		for (size_t i = 0; i < n; ++i) {
@@ -219,51 +180,38 @@ private:
 
 			switch (json_str[i]) {
 				case '[':
-					//std::cout << "[ ";
 					tokens.emplace_back("[", json_token_type::ARRAY_BEGIN);
 					break;
 				case ']':
-					//std::cout << "] ";
 					tokens.emplace_back("]", json_token_type::ARRAY_END);
 					break;
 				case '{':
-					//std::cout << "{ ";
 					tokens.emplace_back("{", json_token_type::OBJECT_BEGIN);
 					break;
 				case '}':
-					//std::cout << "} ";
 					tokens.emplace_back("}", json_token_type::OBJECT_END);
 					break;
 				case ',':
-					//std::cout << ", ";
 					tokens.emplace_back(",", json_token_type::COMMA);
 					break;
 				case ':':
-					//std::cout << ": ";
 					tokens.emplace_back(":", json_token_type::COLON);
 					break;
 				case '"': {
-					std::string str = read_str(json_str, i);
-					//std::cout << str << " ";
-					tokens.emplace_back(str, json_token_type::STRING);
+					tokens.emplace_back(read_str(json_str, i), json_token_type::STRING);
 					break;
 				}
 				case 't':
 				case 'f': {
-					auto b = read_boolean(json_str, i);
-					//std::cout << b << " ";
-					tokens.emplace_back(b, json_token_type::BOOLEAN);
+					tokens.emplace_back(read_boolean(json_str, i), json_token_type::BOOLEAN);
 					break;
 				}
 				case 'n':
-					//std::cout << "null ";
 					i += 3;
 					tokens.emplace_back("null", json_token_type::NIL);
 					break;
 				default:
-					std::string num = read_number(json_str, i);
-					//std::cout << num << " ";
-					tokens.emplace_back(num, json_token_type::NUMBER);
+					tokens.emplace_back(read_number(json_str, i), json_token_type::NUMBER);
 					break;
 			}
 		}

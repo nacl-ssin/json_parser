@@ -24,7 +24,7 @@ struct token {
 	std::string _value;
 	json_token_type _token;
 
-	token() {}
+	token() = default;
 
 	token(std::string val, json_token_type token) : _value(std::move(val)), _token(token) {}
 };
