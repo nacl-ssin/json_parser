@@ -9,14 +9,18 @@
 
 class json_type_base {
 	friend class json_lexer;
-protected:
-	json_type_base *_next;
-
+public:
 	virtual std::string get() = 0;
 
 	virtual json_type_base *get(int idx) = 0;
 
 	virtual json_type_base *get(const std::string &_key) = 0;
+
+	virtual void add(const std::string &key, json_type_base *jnode) = 0;
+
+	virtual void add(json_type_base *jonde) = 0;
+
+	virtual ~json_type_base() = default;
 };
 
 
@@ -40,6 +44,14 @@ public:
 		}
 		return nullptr;
 	}
+
+	void add(const std::string &key, json_type_base *jnode) override {
+		_data[key] = jnode;
+	}
+
+	void add(json_type_base *jnode) override {
+
+	}
 };
 
 
@@ -61,11 +73,19 @@ public:
 	json_type_base *get(const std::string &_key) override {
 		return nullptr;
 	}
+
+	void add(json_type_base *jnode) override {
+		_data.push_back(jnode);
+	}
+
+	void add(const std::string &key, json_type_base *jnode) override {
+
+	}
 };
 
 
 class json_number : public json_type_base {
-private:
+public:
 	std::string _data;
 
 public:
@@ -79,12 +99,20 @@ public:
 
 	json_type_base *get(const std::string &_key) override {
 		return nullptr;
+	}
+
+	void add(json_type_base *jnode) override {
+
+	}
+
+	void add(const std::string &key, json_type_base *jnode) override {
+
 	}
 };
 
 
 class json_string : public json_type_base {
-private:
+public:
 	std::string _data;
 
 public:
@@ -98,12 +126,20 @@ public:
 
 	json_type_base *get(const std::string &_key) override {
 		return nullptr;
+	}
+
+	void add(json_type_base *jnode) override {
+
+	}
+
+	void add(const std::string &key, json_type_base *jnode) override {
+
 	}
 };
 
 
 class json_boolean : public json_type_base {
-private:
+public:
 	std::string _data;
 
 public:
@@ -117,12 +153,20 @@ public:
 
 	json_type_base *get(const std::string &_key) override {
 		return nullptr;
+	}
+
+	void add(json_type_base *jnode) override {
+
+	}
+
+	void add(const std::string &key, json_type_base *jnode) override {
+
 	}
 };
 
 
 class json_null : public json_type_base {
-private:
+public:
 	std::string _data;
 
 public:
@@ -137,7 +181,21 @@ public:
 	json_type_base *get(const std::string &_key) override {
 		return nullptr;
 	}
+
+	void add(json_type_base *jnode) override {}
+
+	void add(const std::string &key, json_type_base *jnode) override {}
 };
 
+
+
+class json_node {
+	union {
+		std::vector<json_node*> _array;
+		std::unordered_map<std::string, json_node*> _object;
+	} _data;
+	std::string _str;
+
+};
 
 #endif //JSON_PARSER_JSON_TYPE_HPP

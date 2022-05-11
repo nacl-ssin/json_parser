@@ -1,0 +1,16 @@
+{
+  "name": "zhangsan",
+  "age": 1999,
+  "ismale": true,
+  "eat": false,
+  "scores": [
+    100.11,
+    80.90,
+    100,
+    123.29,
+    144.22
+  ],
+  "cars": null,
+  "phone": 12244091230,
+  "address": "the earth"
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "name": "zhangsan",
+    "age": 1999,
+    "ismale": true,
+    "eat": false,
+    "scores": [
+      100.11,
+      80.90,
+      100,
+      123.29
+    ],
+    "cars": null,
+    "phone": 12244091230,
+    "address": "the earth"
+  },
+  {
+    "name": "lisi",
+    "age": 18888,
+    "ismale": false,
+    "eat": true,
+    "scores": [
+      100,
+      80.90,
+      100.9,
+      123.9
+    ],
+    "cars": null,
+    "phone": 1939439343230,
+    "address": "the earth",
+    "a": [
+      1,
+      2,
+      3,
+      [
+        4,
+        5,
+        6
+      ]
+    ]
+  },
+  [
+    "isok",
+    "isnook",
+    123.34,
+    200
+  ],
+  {
+    "nihbuhao": "I'am Ok",
+    "key": {
+      "lives": [
+        1,
+        2,
+        3
+      ]
+    }
+  }
+]
