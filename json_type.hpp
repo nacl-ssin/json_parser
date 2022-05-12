@@ -8,8 +8,6 @@
 #include <unordered_map>
 
 class json_type_base {
-	friend class json_lexer;
-
 public:
 	virtual std::string get() = 0;
 
@@ -66,6 +64,7 @@ public:
 class json_array : public json_type_base {
 private:
 	std::vector<json_type_base *> _data;
+
 public:
 	std::string get() override {
 		return "";
@@ -130,6 +129,12 @@ public:
 };
 
 
+#ifndef JSON_NODE_V
+	#define JSON_NODE_V
+#endif
+
+#ifdef JSON_NODE_V
+
 class json_node {
 private:
 	json_type_base *_jr;
@@ -155,6 +160,49 @@ public:
 
 	void destroy() {
 		delete _jr;
+	}
+
+	json_type_base *get_json_root() {
+		return _jr;
+	}
+};
+
+#endif
+
+
+class json_item {
+public:
+	json_type_base *_jr;
+
+	json_item(json_type_base *jr) : _jr(jr) {
+	}
+
+	std::string get_value(const std::string &key) {
+		auto jn = _jr->get(key);
+		if (jn) {
+			return jn->get();
+		}
+		return "";
+	}
+
+	std::string get_element(int idx) {
+		auto jn = _jr->get(idx);
+		if (jn) {
+			return jn->get();
+		}
+		return "";
+	}
+
+	json_item get_next(const std::string &key) {
+		return _jr->get(key);
+	}
+
+	json_item get_next(int idx) {
+		return _jr->get(idx);
+	}
+
+	json_type_base *json_root() {
+		return _jr;
 	}
 };
 

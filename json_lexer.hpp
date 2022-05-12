@@ -17,8 +17,8 @@ public:
 	 * 解析json_str
 	 * @param json_str
 	 */
-	static json_node parse(const std::string &json_str) {
-		auto tokens = extratuct_token(json_str);
+	static json_item parse(const std::string &json_str) {
+		auto tokens = extract_token(json_str);
 		std::cout << tokens.size() << std::endl;
 		for (auto &e : tokens) {
 			std::cout << e._value << " ";
@@ -39,10 +39,21 @@ public:
 		std::cout << "object---------------------------begin" << std::endl;
 		// 跳过begin token
 		++i;
-		token k, v;
+
+		if (i >= toks.size()) {
+			return nullptr;
+		}
+
+		token k = toks[i], v;
+
+		// 是一个空对象
+		if (k._token == json_token_type::OBJECT_END) {
+			std::cout << "object---------------------------end" << std::endl;
+			return nullptr;
+		}
+
 		json_type_base *jnode = new json_object;
 
-		std::cout << "i = " << i << std::endl;
 		while (i < toks.size() && k._token != json_token_type::OBJECT_END) {
 			// 获取token key : value
 			k = toks[i];
@@ -105,7 +116,16 @@ public:
 		std::cout << "array----------------------begin" << std::endl;
 		// 跳过begin token
 		++i;
-		auto t = toks[i];
+		if (i >= toks.size()) {
+			return nullptr;
+		}
+
+		token t = toks[i];
+		// 空数组
+		if (t._token == json_token_type::ARRAY_END) {
+			return nullptr;
+		}
+
 		json_type_base *jnode = new json_array;
 
 		while (i < toks.size() && t._token != json_token_type::ARRAY_END) {
@@ -170,7 +190,7 @@ private:
 	 * @param json_str
 	 * @return
 	 */
-	static std::vector<token> extratuct_token(const std::string &json_str) {
+	static std::vector<token> extract_token(const std::string &json_str) {
 		std::vector<token> tokens;
 		auto n = json_str.size();
 		for (size_t i = 0; i < n; ++i) {
