@@ -140,7 +140,7 @@ void test5() {
 #endif
 
 int main() {
-	//test3();
-	test4();
+	test3();
+	//test4();
 	//test5();
 }

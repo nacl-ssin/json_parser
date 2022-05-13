@@ -14,4 +14,4 @@ foreach (item ${EXEC_LIST})
     add_executable(${tmp} ${item}  common.cpp)
 endforeach ()
 
-add_executable(json_parser main.cpp)
+add_executable(json_parser main.cpp common.cpp)
