@@ -11,7 +11,7 @@ void test6() {
 	std::cout << json_str << std::endl;
 	std::cout << "----------------------" << std::endl;
 
-	auto ji = json_lexer::parse(json_str);
+	auto ji = nacl::json_lexer::parse(json_str);
 
 	std::cout << ji.get_value("name") << std::endl;
 	std::cout << ji.get_value("version") << std::endl;
@@ -34,7 +34,7 @@ void test7() {
 	std::cout << json_str << std::endl;
 	std::cout << "----------------------" << std::endl;
 
-	auto ji = json_lexer::parse(json_str);
+	auto ji = nacl::json_lexer::parse(json_str);
 
 	std::cout << ji.next(0).get_value("name") << std::endl;
 	std::cout << ji.next(0).get_value("age") << std::endl;

@@ -8,7 +8,7 @@
 void test1() {
 	std::string json_str = R"([ "1", 2  , [   3, 4   ,[5], [5.5, [5.51, [5.52,[5.53]  ]  ]  ] ,  5.533    ], [   5.54, [   5.55   ], "5.,56"]  , 6 , "12300"])";
 
-	auto ji = json_lexer::parse(json_str);
+	auto ji = nacl::json_lexer::parse(json_str);
 	std::cout << ji.get_element(0) << std::endl;
 	std::cout << ji.get_element(1) << std::endl;
 }
