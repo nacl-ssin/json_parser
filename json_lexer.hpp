@@ -14,16 +14,16 @@
 namespace nacl {
 
 	enum class json_token_type {
-		OBJECT_BEGIN,
-		OBJECT_END,
-		ARRAY_BEGIN,
-		ARRAY_END,
-		COMMA,
-		COLON,
-		STRING,
-		NUMBER,
-		NIL,
-		BOOLEAN,
+		TOKEN_OBJECT_BEGIN,
+		TOKEN_OBJECT_END,
+		TOKEN_ARRAY_BEGIN,
+		TOKEN_ARRAY_END,
+		TOKEN_COMMA,
+		TOKEN_COLON,
+		TOKEN_STRING,
+		TOKEN_NUMBER,
+		TOKEN_NIL,
+		TOKEN_BOOLEAN,
 	};
 
 	class token {
@@ -35,7 +35,7 @@ namespace nacl {
 
 	public:
 
-		token() : _token(json_token_type::NIL) {
+		token() : _token(json_token_type::TOKEN_NIL) {
 
 		}
 
@@ -55,12 +55,12 @@ namespace nacl {
 
 			std::cout << std::endl << "size = " << tokens.size() << std::endl;
 			int i = 0;
-			if (tokens[0]._token == json_token_type::OBJECT_BEGIN) {
+			if (tokens[0]._token == json_token_type::TOKEN_OBJECT_BEGIN) {
 				return {token_to_object(tokens, i), 1};
-			} else if (tokens[0]._token == json_token_type::ARRAY_BEGIN) {
+			} else if (tokens[0]._token == json_token_type::TOKEN_ARRAY_BEGIN) {
 				return {token_to_array(tokens, i), 1};
 			} else {
-				return {new json_simple(tokens[0]._value), 1};
+				return {new json_simple(tokens[0]._value, json_flag::STRING), 1};
 			}
 		}
 
@@ -79,58 +79,57 @@ namespace nacl {
 				}
 
 				if (json_str[i] == ' ' || json_str[i] == '\n' || json_str[i] == '\r') {
-					std::cout << "skip" << std::endl;
 					continue;
 				}
 
 				switch (json_str[i]) {
 					case '[':
 						std::cout << "[ ";
-						tokens.emplace_back("[", json_token_type::ARRAY_BEGIN);
+						tokens.emplace_back("[", json_token_type::TOKEN_ARRAY_BEGIN);
 						break;
 					case ']':
 						std::cout << "] ";
-						tokens.emplace_back("]", json_token_type::ARRAY_END);
+						tokens.emplace_back("]", json_token_type::TOKEN_ARRAY_END);
 						break;
 					case '{':
 						std::cout << "{ ";
-						tokens.emplace_back("{", json_token_type::OBJECT_BEGIN);
+						tokens.emplace_back("{", json_token_type::TOKEN_OBJECT_BEGIN);
 						break;
 					case '}':
 						std::cout << "} ";
-						tokens.emplace_back("}", json_token_type::OBJECT_END);
+						tokens.emplace_back("}", json_token_type::TOKEN_OBJECT_END);
 						break;
 					case ',':
 						std::cout << ", ";
-						tokens.emplace_back(",", json_token_type::COMMA);
+						tokens.emplace_back(",", json_token_type::TOKEN_COMMA);
 						break;
 					case ':':
 						std::cout << ": ";
-						tokens.emplace_back(":", json_token_type::COLON);
+						tokens.emplace_back(":", json_token_type::TOKEN_COLON);
 						break;
 					case '"': {
 						std::string str = read_str(json_str, i);
 						std::cout << str << " ";
-						tokens.emplace_back(str, json_token_type::STRING);
+						tokens.emplace_back(str, json_token_type::TOKEN_STRING);
 						break;
 					}
 					case 't':
 					case 'f': {
 						std::string str = read_boolean(json_str, i);
 						std::cout << str << " ";
-						tokens.emplace_back(str, json_token_type::BOOLEAN);
+						tokens.emplace_back(str, json_token_type::TOKEN_BOOLEAN);
 						break;
 					}
 					case 'n':
 						i += 3;
-						tokens.emplace_back("null", json_token_type::NIL);
+						tokens.emplace_back("null", json_token_type::TOKEN_NIL);
 						std::cout << "null ";
 						break;
 					default:
-						std::cout << "default" << std::endl;
+						//std::cout << "default" << std::endl;
 						std::string str = read_number(json_str, i);
 						std::cout << str << " ";
-						tokens.emplace_back(str, json_token_type::NUMBER);
+						tokens.emplace_back(str, json_token_type::TOKEN_NUMBER);
 						break;
 				}
 			}
@@ -212,14 +211,14 @@ namespace nacl {
 			token k = toks[i], v;
 
 			// 是一个空对象
-			if (k._token == json_token_type::OBJECT_END) {
+			if (k._token == json_token_type::TOKEN_OBJECT_END) {
 				std::cout << "object---------------------------end" << std::endl;
 				return nullptr;
 			}
 
 			json_type_base *jnode = new json_object;
 
-			while (i < toks.size() && k._token != json_token_type::OBJECT_END) {
+			while (i < toks.size() && k._token != json_token_type::TOKEN_OBJECT_END) {
 				// 获取token key : value
 				k = toks[i];
 				if (i + 2 >= toks.size()) {
@@ -228,34 +227,38 @@ namespace nacl {
 				v = toks[i + 2];
 				std::cout << k._value << " : " << v._value << std::endl;
 				switch (v._token) {
-					case json_token_type::OBJECT_BEGIN: {
+					case json_token_type::TOKEN_OBJECT_BEGIN: {
 						i += 2;
 						jnode->add(k._value, token_to_object(toks, i));
 						goto object_common_block;
 					}
-					case json_token_type::ARRAY_BEGIN: {
+					case json_token_type::TOKEN_ARRAY_BEGIN: {
 						i += 2;
 						jnode->add(k._value, token_to_array(toks, i));
 
 						object_common_block:
 						++i;
-						if (toks[i]._token == json_token_type::COMMA) {
+						if (toks[i]._token == json_token_type::TOKEN_COMMA) {
 							++i;
-						} else if (toks[i]._token == json_token_type::OBJECT_END) {
+						} else if (toks[i]._token == json_token_type::TOKEN_OBJECT_END) {
 							goto object_end;
 						} else {
 							++i;
 						}
 						continue;
 					}
-					case json_token_type::STRING:
-					case json_token_type::NUMBER:
-					case json_token_type::BOOLEAN:
-					case json_token_type::NIL: {
-						auto jstr = new json_simple(v._value);
-						jnode->add(k._value, jstr);
+					case json_token_type::TOKEN_STRING:
+						jnode->add(k._value, new json_simple(v._value, json_flag::STRING));
 						break;
-					}
+					case json_token_type::TOKEN_NUMBER:
+						jnode->add(k._value, new json_simple(v._value, json_flag::NUMBER));
+						break;
+					case json_token_type::TOKEN_BOOLEAN:
+						jnode->add(k._value, new json_simple(v._value, json_flag::BOOLEAN));
+						break;
+					case json_token_type::TOKEN_NIL:
+						jnode->add(k._value, new json_simple(v._value, json_flag::NIL));
+						break;
 					default:
 						std::cout << "default" << std::endl;
 						break;
@@ -263,7 +266,7 @@ namespace nacl {
 
 				i += 3;
 				// 可能是对象结束
-				if (toks[i]._token == json_token_type::OBJECT_END) {
+				if (toks[i]._token == json_token_type::TOKEN_OBJECT_END) {
 					break;
 				}
 				i += 1;
@@ -285,28 +288,28 @@ namespace nacl {
 
 			token t = toks[i];
 			// 空数组
-			if (t._token == json_token_type::ARRAY_END) {
+			if (t._token == json_token_type::TOKEN_ARRAY_END) {
 				return nullptr;
 			}
 
 			json_type_base *jnode = new json_array;
 
-			while (i < toks.size() && t._token != json_token_type::ARRAY_END) {
+			while (i < toks.size() && t._token != json_token_type::TOKEN_ARRAY_END) {
 				t = toks[i];
 				std::cout << t._value << std::endl;
 				switch (t._token) {
-					case json_token_type::OBJECT_BEGIN: {
+					case json_token_type::TOKEN_OBJECT_BEGIN: {
 						jnode->add(token_to_object(toks, i));
 						goto array_common_block;
 					}
-					case json_token_type::ARRAY_BEGIN: {
+					case json_token_type::TOKEN_ARRAY_BEGIN: {
 						jnode->add(token_to_array(toks, i));
 						array_common_block:
 						++i;
 						// 解析完嵌套数组后，后面还有元素
-						if (toks[i]._token == json_token_type::COMMA) {
+						if (toks[i]._token == json_token_type::TOKEN_COMMA) {
 							++i;
-						} else if (toks[i]._token == json_token_type::ARRAY_END) {
+						} else if (toks[i]._token == json_token_type::TOKEN_ARRAY_END) {
 							// 解析完嵌套数组后，后面没有元素
 							goto array_end;
 						} else {
@@ -315,14 +318,18 @@ namespace nacl {
 						}
 						continue;
 					}
-					case json_token_type::STRING:
-					case json_token_type::NUMBER:
-					case json_token_type::BOOLEAN:
-					case json_token_type::NIL: {
-						auto jstr = new json_simple(t._value);
-						jnode->add(jstr);
+					case json_token_type::TOKEN_STRING:
+						jnode->add(new json_simple(t._value, json_flag::STRING));
 						break;
-					}
+					case json_token_type::TOKEN_NUMBER:
+						jnode->add(new json_simple(t._value, json_flag::NUMBER));
+						break;
+					case json_token_type::TOKEN_BOOLEAN:
+						jnode->add(new json_simple(t._value, json_flag::BOOLEAN));
+						break;
+					case json_token_type::TOKEN_NIL:
+						jnode->add(new json_simple(t._value, json_flag::NIL));
+						break;
 					default:
 						std::cout << "default" << std::endl;
 						break;
@@ -330,7 +337,7 @@ namespace nacl {
 
 				++i;
 				// 可能是数组结束
-				if (toks[i]._token == json_token_type::ARRAY_END) {
+				if (toks[i]._token == json_token_type::TOKEN_ARRAY_END) {
 					break;
 				}
 				++i;

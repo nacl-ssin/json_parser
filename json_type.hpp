@@ -12,7 +12,10 @@ namespace nacl {
 	enum class json_flag {
 		ARRAY,
 		OBJECT,
-		SIMPLE
+		STRING,
+		NIL,
+		NUMBER,
+		BOOLEAN
 	};
 
 	class json_type_base {
@@ -131,7 +134,7 @@ namespace nacl {
 		std::string _data;
 
 	public:
-		explicit json_simple(std::string data) : json_type_base(json_flag::SIMPLE), _data(std::move(data)) {
+		explicit json_simple(std::string data, json_flag flag) : json_type_base(flag), _data(std::move(data)) {
 		}
 
 
@@ -220,11 +223,16 @@ namespace nacl {
 			return _jr->_flag == json_flag::OBJECT;
 		}
 
-		json_type_base *json_root() const {
-			return _jr;
+		bool contains(const std::string &key) {
+			return _jr->get(key) != nullptr;
+		}
+
+		void to_file(const std::string &file_path) {
+			to_file(file_path, std::ios_base::in | std::ios_base::trunc);
 		}
 
 
+	private:
 		/**
 		 * 解析str，并将结果输出到文件
 		 * @param file_path
@@ -232,46 +240,110 @@ namespace nacl {
 		 */
 		void to_file(const std::string &file_path, std::ios_base::openmode mode) {
 			std::ofstream ifs(file_path, mode);
-
 			if (ifs.is_open()) {
-				//std::cout << "-----------------------" << std::endl;
-				inner(_jr, 1);
+				std::string format_str;
+				inner(_jr, format_str, false, 1, 0);
+				int indent = 0;
+				std::string buf;
+				for (auto c : format_str) {
+					if (c == ']' || c == '}') {
+						indent -= 4;
+						//std::cout << std::endl;
+						buf += "\n";
+						for (int i = 0; i < indent; ++i) {
+							buf += " ";
+							//std::cout << " ";
+						}
+					}
+
+					//std::cout << c;
+					buf += c;
+					if (c == ':') {
+						//std::cout << " ";
+						buf += " ";
+					}
+					if (c == '[' || c == '{' || c == ',') {
+						if (c == '[' || c == '{') {
+							indent += 4;
+						}
+						//std::cout << std::endl;
+						buf += "\n";
+						for (int i = 0; i < indent; ++i) {
+							//std::cout << " ";
+							buf += " ";
+						}
+					}
+
+					if (buf.size() >= 512) {
+						ifs << buf;
+						buf.clear();
+					}
+				}
+				if (!buf.empty()) {
+					ifs << buf;
+				}
+				//std::cout << buf << std::endl;
+				//std::cout << std::endl;
+
 			} else {
 			}
 		}
 
-		void inner(json_type_base *jr, int indent) {
+		void inner(json_type_base *jr, std::string &format_str, bool is_end, int depth, int indent) {
 			if (jr->type() == json_flag::OBJECT) {
 				auto tmp = (json_object *) jr;
-				std::cout << "{\n";
+				format_str.push_back('{');
+				//std::cout << "{\n";
+				//for (int i = 0; i < indent; ++i)
+				//	std::cout << " ";
+				int i = 0;
 				for (auto &e : tmp->_data) {
-					for (int i = 0; i < indent; ++i) {
-						std::cout << "  ";
-					}
-					std::cout << e.first << ": ";
-					inner(e.second, indent * 2);
+					auto iter = tmp->_data.begin();
+					//std::cout << e.first << ": ";
+					format_str.append("\"" + e.first + "\"" + ":");
+					inner(e.second, format_str, i == tmp->_data.size() - 1, depth + 1, indent += 2);
+					i++;
 				}
-				std::cout << "}" << std::endl;
+				//std::cout << "} ";
+				format_str.push_back('}');
+				if (depth != 1 && !is_end) {
+					format_str.push_back(',');
+					//std::cout << ", ";
+				}
 			} else if (jr->type() == json_flag::ARRAY) {
 				auto tmp = (json_array *) jr;
-				std::cout << "[";
-				for (auto &e : tmp->_data) {
-					inner(e, indent * 2);
+				//std::cout << "[";
+				//for (int i = 0; i < indent; ++i)
+				//	std::cout << " ";
+				format_str.push_back('[');
+				for (int i = 0; i < tmp->_data.size(); ++i) {
+					auto iter = tmp->_data.begin() + i;
+					inner(*iter, format_str, iter == tmp->_data.end() - 1, depth + 1, indent += 2);
 				}
-				std::cout << "]" << std::endl;
+				//std::cout << "]";
+				format_str.push_back(']');
+				if (depth != 1 && !is_end) {
+					//std::cout << ",";
+					format_str.push_back(',');
+				}
 			} else {
-
-				std::cout << jr->get() << " ";
+				//std::cout << jr->get() << " ";
+				std::string str = jr->get();
+				if (jr->_flag == json_flag::STRING) {
+					format_str += "\"" + str + "\"";
+				} else {
+					format_str += str;
+				}
+				if (!is_end) {
+					//std::cout << ", ";
+					format_str.push_back(',');
+				}
 			}
 		}
 
-		void to_file(const std::string &file_path) {
-			to_file(file_path, std::ios_base::in | std::ios_base::trunc);
-		}
-
-	private:
 		void destroy() {
 			if (_ref_ptr && *_ref_ptr <= 1) {
+				std::cout << "destroy" << std::endl;
 				delete _jr;
 				delete _ref_ptr;
 				_jr = nullptr;
