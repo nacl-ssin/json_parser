@@ -1,57 +1,22 @@
-[
-    {
-        "address": "the earth",
-        "phone": 12244091230,
-        "cars": null,
-        "age": 1999,
-        "name": "zhangsan",
-        "ismale": true,
-        "eat": false,
-        "scores": [
-            "100.11",
-            80.90,
-            100,
-            "123.29"
-        ]
-    },
-    {
-        "address": "the earth",
-        "phone": 1939439343230,
-        "cars": null,
-        "age": 18888,
-        "name": "lisi",
-        "ismale": false,
-        "a": [
-            1,
-            2,
-            "3",
-            [
-                4,
-                "5",
-                6
-            ]
-        ],
-        "eat": true,
-        "scores": [
-            100,
-            80.90,
-            100.9
-        ]
-    },
-    [
-        "isok",
-        "isnook",
-        123.34,
-        200
-    ],
-    {
-        "key": {
-            "lives": [
+{
+    "other": [
+        100,
+        102.1,
+        {
+            "card": [
                 1,
                 2,
-                3
-            ]
-        },
-        "nihaobuhao": "I'am Ok"
-    }
-]
+                3,
+                {
+                    "card3name": null,
+                    "card1name": "china",
+                    "card2name": "one"
+                }
+            ],
+            "eating": false,
+            "cars": null
+        }
+    ],
+    "name": 124,
+    "age": 19
+}

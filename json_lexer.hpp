@@ -229,12 +229,12 @@ namespace nacl {
 				switch (v._token) {
 					case json_token_type::TOKEN_OBJECT_BEGIN: {
 						i += 2;
-						jnode->add(k._value, token_to_object(toks, i));
+						jnode->add(json_data(k._value, token_to_object(toks, i)));
 						goto object_common_block;
 					}
 					case json_token_type::TOKEN_ARRAY_BEGIN: {
 						i += 2;
-						jnode->add(k._value, token_to_array(toks, i));
+						jnode->add(json_data(k._value, token_to_array(toks, i)));
 
 						object_common_block:
 						++i;
@@ -248,16 +248,16 @@ namespace nacl {
 						continue;
 					}
 					case json_token_type::TOKEN_STRING:
-						jnode->add(k._value, new json_simple(v._value, json_flag::STRING));
+						jnode->add(json_data(k._value, new json_simple(v._value, json_flag::STRING)));
 						break;
 					case json_token_type::TOKEN_NUMBER:
-						jnode->add(k._value, new json_simple(v._value, json_flag::NUMBER));
+						jnode->add(json_data(k._value, new json_simple(v._value, json_flag::NUMBER)));
 						break;
 					case json_token_type::TOKEN_BOOLEAN:
-						jnode->add(k._value, new json_simple(v._value, json_flag::BOOLEAN));
+						jnode->add(json_data(k._value, new json_simple(v._value, json_flag::BOOLEAN)));
 						break;
 					case json_token_type::TOKEN_NIL:
-						jnode->add(k._value, new json_simple(v._value, json_flag::NIL));
+						jnode->add(json_data(k._value, new json_simple(v._value, json_flag::NIL)));
 						break;
 					default:
 						std::cout << "default" << std::endl;
@@ -299,11 +299,11 @@ namespace nacl {
 				std::cout << t._value << std::endl;
 				switch (t._token) {
 					case json_token_type::TOKEN_OBJECT_BEGIN: {
-						jnode->add(token_to_object(toks, i));
+						jnode->add(json_data(token_to_object(toks, i)));
 						goto array_common_block;
 					}
 					case json_token_type::TOKEN_ARRAY_BEGIN: {
-						jnode->add(token_to_array(toks, i));
+						jnode->add(json_data(token_to_array(toks, i)));
 						array_common_block:
 						++i;
 						// 解析完嵌套数组后，后面还有元素

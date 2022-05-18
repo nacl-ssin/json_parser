@@ -13,7 +13,7 @@ void test1() {
 	//std::cout << str << std::endl;
 	auto ji = nacl::json_lexer::parse(str);
 	//std::cout << "00000000000000000" << std::endl;
-	//ji.to_file("../out/1.json");
+	ji.to_file("../out/1.json");
 	//std::cout << "00000000000000000" << std::endl;
 
 	std::cout << "========================" << std::endl;
@@ -59,8 +59,15 @@ void test2(nacl::json_item ji) {
 //249,245,215
 //f9f5d7
 //FFFFEB
+
+void test2() {
+	std::cout << 11 << std::endl;
+
+}
+
 int main() {
 	test1();
+	//test2();
 	return 0;
 }
 

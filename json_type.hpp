@@ -18,6 +18,25 @@ namespace nacl {
 		BOOLEAN
 	};
 
+
+	class json_type_base;
+
+
+	struct json_data {
+		std::string _str;
+		json_type_base *_jnode;
+
+		json_data() : _jnode(nullptr) {
+		}
+
+		json_data(json_type_base *jnode) : _jnode(jnode) {
+		}
+
+		json_data(std::string str, json_type_base *jnode) : _str(std::move(str)), _jnode(jnode) {
+		}
+	};
+
+
 	class json_type_base {
 		friend class json_item;
 
@@ -34,9 +53,7 @@ namespace nacl {
 
 		virtual json_type_base *get(const std::string &_key) = 0;
 
-		virtual void add(const std::string &key, json_type_base *jnode) = 0;
-
-		virtual void add(json_type_base *jonde) = 0;
+		virtual void add(const json_data &jdata) = 0;
 
 		json_flag type() const {
 			return _flag;
@@ -46,6 +63,7 @@ namespace nacl {
 	};
 
 
+	// object
 	class json_object : public json_type_base {
 	public:
 		std::unordered_map<std::string, json_type_base *> _data;
@@ -71,12 +89,8 @@ namespace nacl {
 			return nullptr;
 		}
 
-		void add(const std::string &key, json_type_base *jnode) override {
-			_data[key] = jnode;
-		}
-
-		void add(json_type_base *jnode) override {
-
+		void add(const json_data &jdata) override {
+			_data[jdata._str] = jdata._jnode;
 		}
 
 		~json_object() override {
@@ -88,6 +102,7 @@ namespace nacl {
 	};
 
 
+	// array
 	class json_array : public json_type_base {
 	public:
 		std::vector<json_type_base *> _data;
@@ -112,12 +127,8 @@ namespace nacl {
 			return nullptr;
 		}
 
-		void add(json_type_base *jnode) override {
-			_data.push_back(jnode);
-		}
-
-		void add(const std::string &key, json_type_base *jnode) override {
-
+		void add(const json_data &jdata) override {
+			_data.push_back(jdata._jnode);
 		}
 
 		~json_array() override {
@@ -129,6 +140,7 @@ namespace nacl {
 	};
 
 
+	// string/boolean/null/number
 	class json_simple : public json_type_base {
 	private:
 		std::string _data;
@@ -150,12 +162,8 @@ namespace nacl {
 			return nullptr;
 		}
 
-		void add(const std::string &key, json_type_base *jnode) override {
-
-		}
-
-		void add(json_type_base *jonde) override {
-
+		void add(const json_data &jdata) override {
+			_data = jdata._str;
 		}
 	};
 
